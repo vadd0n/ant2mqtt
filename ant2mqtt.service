@@ -1,0 +1,12 @@
+[Unit]
+Description=ANT BMS posting into mqtt
+After=multi-user.target
+
+[Service]
+User=ant
+Type=idle
+ExecStart=/usr/bin/python3 /home/ant/ant2mqtt.py
+Restart=always
+RestartSec=10
+
+[Install]
