@@ -43,10 +43,6 @@ def stringify(something):
 def on_connect(client, userdata, flags, rc):
     print("Connected with result code "+str(rc))
 
-    # Subscribing in on_connect() means that if we lose the connection and
-    # reconnect then subscriptions will be renewed.
-    #client.subscribe("$SYS/#")
-
 # The callback for when a PUBLISH message is received from the server.
 def on_message(client, userdata, msg):
     print(msg.topic+" "+str(msg.payload))
@@ -76,10 +72,16 @@ while True :
  if(int(len(Antw33)) == 140):
 #  print(list(Antw33))
   Packet = struct.unpack(">4B33HiB4I6h3B2HbiBHB2HB4HI2H",Antw33)
-  us = dict(zip(PacketKeys,Packet))
-  us.pop("by1",None);us.pop("by2",None);us.pop("by3",None);us.pop("by4",None)
-# Our application produce some messages
-  mqttc.publish("ant-bms", json.dumps(us), qos=1)
+  crc = 0
+  for x in range(4, 137): crc = crc + Antw33[x]
+
+  if( Packet[68] == crc ):
+      # print("crc ok")
+      us = dict(zip(PacketKeys,Packet))
+      us.pop("by1",None);us.pop("by2",None);us.pop("by3",None);us.pop("by4",None)
+      
+      # Our application produce some messages
+      mqttc.publish("ant-bms", json.dumps(us), qos=1)
  
   time.sleep(10)
   #break;
